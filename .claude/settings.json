@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(guardian-fix)",
+      "Skill(guardian-query)",
+      "Skill(guardian-risks)",
+      "Skill(guardian-scan)",
+      "Skill(guardian-secure-prompt)",
+      "Skill(guardian-setup)",
+      "Skill(guardian-threat-model)",
+      "Bash(apiiro *)"
+    ]
+  }
+}
