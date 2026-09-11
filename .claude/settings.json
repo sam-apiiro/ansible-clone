@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "deny": [
+      "Skill(guardian-fix)",
+      "Skill(guardian-query)",
+      "Skill(guardian-risks)",
+      "Skill(guardian-scan)",
+      "Skill(guardian-secure-prompt)",
+      "Skill(guardian-setup)",
+      "Skill(guardian-threat-model)",
+      "Skill(apiiro-guardian)",
+      "Skill(apiiro-fix)",
+      "Skill(apiiro-risks)",
+      "Skill(apiiro-fast-scan)",
+      "Skill(apiiro-diff-scan)",
+      "Skill(apiiro-secure-prompt)",
+      "Skill(apiiro-setup)",
+      "Skill(apiiro-threat-model)",
+      "Bash(apiiro *)",
+      "Bash(apiiro)"
+    ]
+  },
+  "skillOverrides": {
+    "guardian-fix": "off",
+    "guardian-query": "off",
+    "guardian-risks": "off",
+    "guardian-scan": "off",
+    "guardian-secure-prompt": "off",
+    "guardian-setup": "off",
+    "guardian-threat-model": "off",
+    "apiiro-guardian": "off",
+    "apiiro-fix": "off",
+    "apiiro-risks": "off",
+    "apiiro-fast-scan": "off",
+    "apiiro-diff-scan": "off",
+    "apiiro-secure-prompt": "off",
+    "apiiro-setup": "off",
+    "apiiro-threat-model": "off"
+  }
+}
