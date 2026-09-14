@@ -136,7 +136,10 @@ def boilerplate_module(modfile, args, interpreter, check):
 def runtest( modfile, argspath):
     """Test run a module, piping it's output for reporting."""
 
-    os.system("chmod +x %s" % modfile)
+    # Use os.chmod() instead of shelling out to `chmod` via os.system() — this
+    # avoids passing a shell-interpolated string built from a user-controlled
+    # path (Apiiro risk 16200f84bd6455e112a12749ffa2d66a).
+    os.chmod(modfile, 0o755)
 
     invoke = "%s" % (modfile)
     if argspath is not None:     
@@ -165,10 +168,13 @@ def runtest( modfile, argspath):
 def rundebug(debugger, modfile, argspath):
     """Run interactively with console debugger."""
 
+    # Pass args as a list without shell=True so a path/debugger value
+    # containing shell metacharacters can't be interpreted by a shell
+    # (Apiiro risk 72f0f2edf55182fd3ff9a9f6653d2dae).
     if argspath is not None:
-        subprocess.call("%s %s %s" % (debugger, modfile, argspath), shell=True)
+        subprocess.call([debugger, modfile, argspath])
     else:
-        subprocess.call("%s %s" % (debugger, modfile), shell=True)
+        subprocess.call([debugger, modfile])
 
 def main(): 
 
