@@ -33,6 +33,11 @@ Changelog:
     - 2013-09-01 pgehres: Refactored implementation to make use of caching and to
         limit the number of connections to external cobbler server for performance.
         Added use of cobbler.ini file to configure settings. Tested with Cobbler 2.4.0
+
+Requirements:
+    - defusedxml (`pip install defusedxml`) — hardens the xmlrpclib client
+      used to talk to the cobbler server against XXE/entity-expansion
+      attacks from a malicious or compromised server response.
 """
 
 # (c) 2012, Michael DeHaan <michael.dehaan@gmail.com>
@@ -61,6 +66,13 @@ import os
 import re
 from time import time
 import xmlrpclib
+# Harden the stdlib xmlrpclib client against XXE / entity-expansion attacks
+# from a malicious or compromised XML-RPC server response (Apiiro risk
+# 2c4d68f9cc60411ea5b2b351c6b7f211). This monkey-patches xmlrpclib's XML
+# parser in place, so xmlrpclib.Server below picks up the hardened parser
+# with no other code changes.
+import defusedxml.xmlrpc
+defusedxml.xmlrpc.monkey_patch()
 
 try:
     import json
