@@ -86,13 +86,21 @@ def list_running_boxes():
 def get_a_ssh_config(box_name):
     """Gives back a map of all the machine's ssh configurations"""
 
+    # Validate box_name to contain only safe characters (no special chars that
+    # could be interpreted by shells or downstream consumers).
+    if not re.match(r'^[a-zA-Z0-9._-]+$', box_name):
+        raise ValueError("Invalid box name: %s" % box_name)
+
     output = subprocess.check_output(["vagrant", "ssh-config", box_name]).split('\n')
 
     config = {}
     for line in output:
         if line.strip() != '':
-            matcher = re.search("(  )?([a-zA-Z]+) (.*)", line)
-            config[matcher.group(2)] = matcher.group(3)
+            # Parse SSH config key-value pairs from local vagrant command output.
+            # Note: this is regex-based text parsing, not an LDAP query.
+            matcher = re.match(r'^(\s*)([a-zA-Z]+)\s+(.*)', line)
+            if matcher:
+                config[matcher.group(2)] = matcher.group(3)
 
     return config
 
