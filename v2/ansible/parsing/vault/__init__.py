@@ -197,6 +197,13 @@ class VaultEditor(object):
         if existing_data:
             self.write_data(data, tmp_path)
 
+        # Apiiro risk 1200cf859f0b59749324b9bf67f79a8c flagged this call() as
+        # OS Command Injection because its argument isn't a static string.
+        # _editor_shell_command() below already returns a list (shlex.split
+        # of $EDITOR + the filename as a separate element), and call() is
+        # invoked with no shell=True — so no shell ever interprets $EDITOR
+        # or tmp_path, regardless of their content. Reviewed as a false
+        # positive; no code change needed.
         # drop the user into an editor on the tmp file
         call(self._editor_shell_command(tmp_path))
         tmpdata = self.read_data(tmp_path)
@@ -276,6 +283,11 @@ class VaultEditor(object):
         _, tmp_path = tempfile.mkstemp()
         self.write_data(dec_data, tmp_path)
 
+        # Apiiro risk 2ef2afed3e9449b7f0916d10db602a1d flagged this call() the
+        # same way — see the identical reasoning at the _editor_shell_command
+        # call above: _pager_shell_command() also returns a list (shlex.split
+        # of $PAGER + filename), invoked without shell=True, so nothing here
+        # is shell-interpreted. Reviewed as a false positive.
         # drop the user into pager on the tmp file
         call(self._pager_shell_command(tmp_path))
         os.remove(tmp_path)
