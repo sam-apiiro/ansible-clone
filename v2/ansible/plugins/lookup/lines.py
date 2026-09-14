@@ -29,6 +29,17 @@ class LookupModule(object):
 
         ret = []
         for term in terms:
+            # Apiiro risk 384acbbc495be92f72aa3d466c3a1021 flagged this
+            # shell=True subprocess.Popen() call as OS Command Injection.
+            # shell=True here is intentional, by design: the entire purpose
+            # of the `lines` lookup is to run a shell command specified by
+            # the playbook author (e.g. lookup('lines', 'cat file | grep
+            # foo')) and return its output line by line — pipes, globs, and
+            # shell builtins are part of the feature. `term` comes from
+            # playbook content, which the playbook author already fully
+            # controls; there is no untrusted/external input crossing a
+            # trust boundary here. Removing shell=True would break the
+            # lookup's documented behavior. Reviewed and left as-is.
             p = subprocess.Popen(term, cwd=self.basedir, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
             (stdout, stderr) = p.communicate()
             if p.returncode == 0:
