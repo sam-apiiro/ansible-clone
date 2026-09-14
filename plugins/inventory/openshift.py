@@ -84,7 +84,10 @@ def passwd_setup(top_level_url, username, password):
 
 
 username = get_config('ANSIBLE_OPENSHIFT_USERNAME', 'default_rhlogin')
-password = get_config('ANSIBLE_OPENSHIFT_PASSWORD', 'password')
+password = os.getenv('ANSIBLE_OPENSHIFT_PASSWORD')
+if not password:
+    print "failed=True msg='missing ANSIBLE_OPENSHIFT_PASSWORD, set this environment variable to your OpenShift password'"
+    sys.exit(1)
 broker_url = 'https://%s/broker/rest/' % get_config('ANSIBLE_OPENSHIFT_BROKER', 'libra_server')
 
 
