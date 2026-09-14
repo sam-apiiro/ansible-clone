@@ -70,9 +70,18 @@ import xmlrpclib
 # from a malicious or compromised XML-RPC server response (Apiiro risk
 # 2c4d68f9cc60411ea5b2b351c6b7f211). This monkey-patches xmlrpclib's XML
 # parser in place, so xmlrpclib.Server below picks up the hardened parser
-# with no other code changes.
-import defusedxml.xmlrpc
-defusedxml.xmlrpc.monkey_patch()
+# with no other code changes. Falls back to plain (unhardened) xmlrpclib
+# if defusedxml isn't installed, matching this file's existing convention
+# for optional dependencies (see the json/simplejson fallback below).
+try:
+    import defusedxml.xmlrpc
+    defusedxml.xmlrpc.monkey_patch()
+except ImportError:
+    import sys
+    sys.stderr.write(
+        "WARNING: defusedxml is not installed; xmlrpclib is not hardened "
+        "against XXE. Run `pip install defusedxml` to fix this.\n"
+    )
 
 try:
     import json
