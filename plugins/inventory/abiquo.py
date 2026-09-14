@@ -62,7 +62,9 @@ def api_get(link, config):
             request = urllib2.Request(link['href']+'?limit=0')
             request.add_header("Accept",link['type'])
         # Auth
-        base64string = base64.encodestring('%s:%s' % (config.get('auth','apiuser'),config.get('auth','apipass'))).replace('\n', '')
+        apiuser = config.get('auth','apiuser')
+        apipass = os.environ.get('ABIQUO_API_PASS') or config.get('auth','apipass')
+        base64string = base64.encodestring('%s:%s' % (apiuser, apipass)).replace('\n', '')
         request.add_header("Authorization", "Basic %s" % base64string)
         result = urllib2.urlopen(request)
         return json.loads(result.read())
