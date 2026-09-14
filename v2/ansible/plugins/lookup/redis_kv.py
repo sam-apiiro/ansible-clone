@@ -55,10 +55,15 @@ class LookupModule(object):
             p = '(?P<scheme>[^:]+)://?(?P<host>[^:/ ]+).?(?P<port>[0-9]*).*'
 
             try:
-                m = re.search(p, url)
+                m = re.match(p, url)
+                if m is None:
+                    raise errors.AnsibleError("Bad URI in redis lookup")
+                scheme = m.group('scheme')
+                if scheme not in ('redis', 'rediss'):
+                    raise errors.AnsibleError("Bad URI in redis lookup: unsupported scheme '%s'" % scheme)
                 host = m.group('host')
                 port = int(m.group('port'))
-            except AttributeError:
+            except (AttributeError, ValueError):
                 raise errors.AnsibleError("Bad URI in redis lookup")
 
             try:

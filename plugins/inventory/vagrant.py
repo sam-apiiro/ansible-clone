@@ -75,7 +75,7 @@ def list_running_boxes():
     boxes = []
 
     for line in output:
-        matcher = re.search("([^\s]+)[\s]+running \(.+", line)
+        matcher = re.search("([^\s]+)[\s]+running \(.+", line)  # nosemgrep: python.lang.security.insecure-ldap-query  # Not an LDAP query; parsing local vagrant CLI output
         if matcher:
             boxes.append(matcher.group(1))
 

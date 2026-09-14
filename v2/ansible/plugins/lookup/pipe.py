@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
 
+import shlex
 import subprocess
 from ansible import utils, errors
 
@@ -43,7 +44,7 @@ class LookupModule(object):
             '''
             term = str(term)
 
-            p = subprocess.Popen(term, cwd=self.basedir, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
+            p = subprocess.Popen(shlex.split(term), cwd=self.basedir, shell=False, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
             (stdout, stderr) = p.communicate()
             if p.returncode == 0:
                 ret.append(stdout.decode("utf-8").rstrip())
