@@ -74,6 +74,12 @@ def list_running_boxes():
 
     boxes = []
 
+    # Apiiro risk bce25564bbf7bf7ee3359972f7e4aa69 flagged this regex match
+    # (misclassified as "LDAP Injection" — there is no LDAP anywhere in this
+    # file). `line` comes from `vagrant status`, a local subprocess we
+    # invoked ourselves via a list-form argv with no shell=True; it never
+    # carries external/attacker-controlled input. Reviewed as a false
+    # positive; no code change needed here.
     for line in output:
         matcher = re.search("([^\s]+)[\s]+running \(.+", line)
         if matcher:
@@ -88,6 +94,13 @@ def get_a_ssh_config(box_name):
 
     output = subprocess.check_output(["vagrant", "ssh-config", box_name]).split('\n')
 
+    # Apiiro risk abca41d8cd1c3dc2da91aea5ccfb4148 flagged this regex match
+    # (same misclassification as above — no LDAP involved). `line` comes
+    # from `vagrant ssh-config <box_name>`, and box_name itself always
+    # originates from list_running_boxes() above (parsed from `vagrant
+    # status`), never from external/attacker-controlled input such as the
+    # --host CLI flag (which is only used later for equality filtering,
+    # never passed to subprocess). Reviewed as a false positive.
     config = {}
     for line in output:
         if line.strip() != '':
