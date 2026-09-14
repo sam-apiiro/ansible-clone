@@ -68,6 +68,8 @@ CRYPTO_UPGRADE = "ansible-vault requires a newer version of pycrypto than the on
 
 HEADER='$ANSIBLE_VAULT'
 CIPHER_WHITELIST=['AES', 'AES256']
+ALLOWED_PAGERS=frozenset(['less', 'more', 'most', 'cat', 'pg', 'view', 'head', 'tail', 'bat', 'lv'])
+ALLOWED_EDITORS=frozenset(['vim', 'vi', 'nano', 'emacs', 'ed', 'pico', 'code', 'subl', 'gedit', 'kate', 'ne', 'joe', 'jed', 'mcedit'])
 
 class VaultLib(object):
 
@@ -198,7 +200,7 @@ class VaultEditor(object):
             self.write_data(data, tmp_path)
 
         # drop the user into an editor on the tmp file
-        call(self._editor_shell_command(tmp_path))
+        call(self._editor_shell_command(tmp_path), shell=False)  # nosemgrep: dangerous-subprocess-use-audit
         tmpdata = self.read_data(tmp_path)
 
         # create new vault
@@ -277,7 +279,7 @@ class VaultEditor(object):
         self.write_data(dec_data, tmp_path)
 
         # drop the user into pager on the tmp file
-        call(self._pager_shell_command(tmp_path))
+        call(self._pager_shell_command(tmp_path), shell=False)  # nosemgrep: dangerous-subprocess-use-audit
         os.remove(tmp_path)
 
     def encrypt_file(self):
@@ -339,6 +341,17 @@ class VaultEditor(object):
     def _editor_shell_command(self, filename):
         EDITOR = os.environ.get('EDITOR','vim')
         editor = shlex.split(EDITOR)
+        editor_name = os.path.basename(editor[0]) if editor else 'vim'
+        if editor_name not in ALLOWED_EDITORS:
+            raise errors.AnsibleError(
+                "EDITOR '%s' is not in the allowed editors list. "
+                "Allowed editors: %s" % (editor_name, ', '.join(sorted(ALLOWED_EDITORS)))
+        # Validate the editor executable exists and is a real program
+        if not editor or shutil.which(editor[0]) is None:
+            raise errors.AnsibleError(
+                "The editor '%s' was not found. Please set the EDITOR "
+                "environment variable to a valid editor." % EDITOR
+            )
         editor.append(filename)
 
         return editor
@@ -346,6 +359,17 @@ class VaultEditor(object):
     def _pager_shell_command(self, filename):
         PAGER = os.environ.get('PAGER','less')
         pager = shlex.split(PAGER)
+        pager_name = os.path.basename(pager[0]) if pager else 'less'
+        if pager_name not in ALLOWED_PAGERS:
+            raise errors.AnsibleError(
+                "PAGER '%s' is not in the allowed pagers list. "
+                "Allowed pagers: %s" % (pager_name, ', '.join(sorted(ALLOWED_PAGERS)))
+        # Validate the pager executable exists and is a real program
+        if not pager or shutil.which(pager[0]) is None:
+            raise errors.AnsibleError(
+                "The pager '%s' was not found. Please set the PAGER "
+                "environment variable to a valid pager." % PAGER
+            )
         pager.append(filename)
 
         return pager

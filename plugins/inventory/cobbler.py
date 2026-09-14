@@ -60,6 +60,10 @@ import ConfigParser
 import os
 import re
 from time import time
+
+from defusedxml.xmlrpc import monkey_patch
+monkey_patch()  # Secure xmlrpclib against XXE and XML entity expansion attacks
+
 import xmlrpclib
 
 try:
