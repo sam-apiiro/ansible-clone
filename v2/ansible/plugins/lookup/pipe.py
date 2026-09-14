@@ -43,6 +43,16 @@ class LookupModule(object):
             '''
             term = str(term)
 
+            # Apiiro risk 1e9dc6870c99d41c237dbb889290f866 flagged this
+            # shell=True subprocess.Popen() call as OS Command Injection.
+            # shell=True is intentional here, same as lookup_plugin.lines:
+            # the `pipe` lookup's entire purpose is to run a shell command
+            # given by the playbook author (lookup('pipe', '<command>')) and
+            # return its output — pipes, redirection, and shell builtins are
+            # part of the documented feature. `term` comes from playbook
+            # content the playbook author already fully controls, not from
+            # an external/untrusted source. Removing shell=True would break
+            # the lookup's intended behavior. Reviewed and left as-is.
             p = subprocess.Popen(term, cwd=self.basedir, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
             (stdout, stderr) = p.communicate()
             if p.returncode == 0:
