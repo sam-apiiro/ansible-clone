@@ -54,6 +54,14 @@ class LookupModule(object):
 
             p = '(?P<scheme>[^:]+)://?(?P<host>[^:/ ]+).?(?P<port>[0-9]*).*'
 
+            # Apiiro risk aa390577eed3261dfe67237f081a3a38 flagged this regex
+            # match as "LDAP Injection" — there is no LDAP involved. `url` is
+            # parsed from a playbook-supplied lookup term (trusted playbook
+            # content, e.g. lookup('redis_kv', 'redis://host:port,key')), and
+            # host/port are used only as connection parameters to
+            # redis.Redis() below — a socket connection, not a query or
+            # command string that gets concatenated/interpreted. Reviewed as
+            # a false positive; no code change needed.
             try:
                 m = re.search(p, url)
                 host = m.group('host')
